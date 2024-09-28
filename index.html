@@ -3,163 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talha's Player</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://content.jwplatform.com/libraries/KB5zFt7A.js"></script>
+    <title>Chained Facebook Video</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        #player {
+        /* Style for the text overlay */
+        .overlay-text {
             position: absolute;
-            width: 100% !important;
-            height: 100% !important;
-            background-color: #000;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            display: none;
         }
-        .jw-icon-rewind,
-        .jw-icon-forward {
-            filter: brightness(0) invert(1); /* Make icons white */
-        }
-        .jw-text-live {
-            color: red;
-        }
-        .jw-button-container {
-            display: flex;
-            justify-content: center; /* Center buttons horizontally */
-            gap: 10px; /* Adjust the gap between buttons */
-        }
-        .jw-icon-fullscreen,
-        .jw-icon-share,
-        .jw-icon-pip {
-            margin: 0 5px; /* Adjust margin as needed */
+        .video-container {
+            position: relative;
+            width: 560px;
+            height: 314px;
         }
     </style>
 </head>
 <body>
-    <div id="player"></div>
+
+    <!-- First Facebook Video -->
+    <div id="fb-video1-container" class="video-container">
+        <!-- Overlay text -->
+        <div id="overlay-text1" class="overlay-text">Made By Abu Talha Raj</div>
+
+        <div class="fb-video" 
+            data-href="https://www.facebook.com/abutalharaj002/videos/475659621772404/" 
+            data-width="560" 
+            data-show-text="false" 
+            data-autoplay="true"></div>
+    </div>
+
+    <!-- Second Facebook Video (initially hidden) -->
+    <div id="fb-video2-container" class="video-container" style="display:none;">
+        <!-- Overlay text -->
+        <div id="overlay-text2" class="overlay-text">Made By Abu Talha Raj</div>
+
+        <div class="fb-video" 
+            data-href="https://www.facebook.com/abutalharaj002/videos/1032319684962549/" 
+            data-width="560" 
+            data-show-text="false" 
+            data-autoplay="true"></div>
+    </div>
 
     <script>
-        // Function to validate embedding
-        function isValidEmbed() {
-            const referrer = document.referrer;
-            // Add allowed domains here
-            const allowedDomains = ["https://team.padma.rf.gd", "https://team.padma.rf.gd"];
-            return allowedDomains.some(domain => referrer.includes(domain));
-        }
+        // Load the Facebook SDK
+        window.fbAsyncInit = function() {
+            FB.init({
+                xfbml      : true,
+                version    : 'v10.0'
+            });
 
-        if (!isValidEmbed()) {
-            document.body.innerHTML = '<h1>চুরি করা মহাপাপ(By Order Of Talha, The Creator Of This Page)</h1><p></p>';
-        } else {
-            jwplayer.key = '';
+            // Subscribe to video player events
+            FB.Event.subscribe('xfbml.ready', function(msg) {
+                if (msg.type === 'video') {
+                    var video1Player = msg.instance;
 
-            function setupPlayer(videoUrls, drmOptions = null, posterUrl = null) {
-                const playlistItems = videoUrls.map((url, index) => {
-                    return {
-                        title: "Welcome To Team Padma",
-                        description: "Made By Abu Talha Taj",
-                        image: "https://s11.gifyu.com/images/S1JiQ.jpg",
-                        sources: [
-                            {
-                                file: url,
-                                type: determineSourceType(url),
-                                label: "1080p",
-                                default: true
-                            }
-                        ],
-                        drm: drmOptions ? {
-                            clearkey: {
-                                keyId: drmOptions.keyId,
-                                key: drmOptions.key
-                            }
-                        } : null
-                    };
-                });
+                    // Show the overlay text before the video starts
+                    document.getElementById('overlay-text1').style.display = 'block';
 
-                jwplayer("player").setup({
-                    controls: true,
-                    sharing: true,
-                    displaytitle: true,
-                    autoplay: true,
-                    displaydescription: true,
-                    abouttext: "Video Player By Talha's Stream",
-                    aboutlink: "https://t.me/talhasmovie_request_bot",
-                    skin: {
-                        name: "netflix"
-                    },
-                    captions: {
-                        color: "#FFF",
-                        fontSize: 14,
-                        backgroundOpacity: 0,
-                        edgeStyle: "raised"
-                    },
-                    playlist: playlistItems,
-                    advertising: {
-                        client: "vast",
-                        schedule: [
-                            {
-                                offset: "pre",
-                                tag: ""
-                            }
-                        ]
-                    },
-                    image: posterUrl
-                }).on("ready", function () {
-                    const playerContainer = jwplayer().getContainer();
-                    const buttonContainer = playerContainer.querySelector(".jw-button-container");
-                    const spacer = buttonContainer.querySelector(".jw-spacer");
-                    const timeSlider = playerContainer.querySelector(".jw-slider-time");
-                    buttonContainer.replaceChild(timeSlider, spacer);
-
-                    const rewindContainer = playerContainer.querySelector(".jw-display-icon-rewind");
-                    const forwardContainer = rewindContainer.cloneNode(true);
-                    const forwardDisplayButton = forwardContainer.querySelector(".jw-icon-rewind");
-                    forwardDisplayButton.style.transform = "scaleX(-1)";
-                    forwardDisplayButton.ariaLabel = "Forward 10 Seconds";
-                    const nextContainer = playerContainer.querySelector(".jw-display-icon-next");
-                    nextContainer.parentNode.insertBefore(forwardContainer, nextContainer);
-
-                    playerContainer.querySelector(".jw-display-icon-next").style.display = "none";
-                    const rewindControlBarButton = buttonContainer.querySelector(".jw-icon-rewind");
-                    const forwardControlBarButton = rewindControlBarButton.cloneNode(true);
-                    forwardControlBarButton.style.transform = "scaleX(-1)";
-                    forwardControlBarButton.ariaLabel = "Forward 10 Seconds";
-                    rewindControlBarButton.parentNode.insertBefore(forwardControlBarButton, rewindControlBarButton.nextElementSibling);
-
-                    [forwardDisplayButton, forwardControlBarButton].forEach((button) => {
-                        button.onclick = () => {
-                            jwplayer().seek(jwplayer().getPosition() + 10);
-                        };
+                    // Listen for when the first video starts playing
+                    video1Player.subscribe('startedPlaying', function() {
+                        document.getElementById('overlay-text1').style.display = 'none';
                     });
-                });
-            }
 
-            function determineSourceType(url) {
-                if (url.endsWith(".mkv") || url.endsWith(".mp4")) {
-                    return "mp4";
-                } else if (url.endsWith(".m3u8")) {
-                    return "hls";
-                } else if (url.endsWith(".mpd")) {
-                    return "dash";
+                    // Listen for when the first video finishes playing
+                    video1Player.subscribe('finishedPlaying', function() {
+                        // Hide the first video container
+                        document.getElementById('fb-video1-container').style.display = 'none';
+                        
+                        // Show the second video container and reload it
+                        document.getElementById('fb-video2-container').style.display = 'block';
+
+                        // Reload the XFBML to render the second video
+                        FB.XFBML.parse(document.getElementById('fb-video2-container'));
+
+                        // Show the overlay text for the second video
+                        document.getElementById('overlay-text2').style.display = 'block';
+                    });
                 }
-                return "mp4"; // Default to MP4
-            }
+            });
+        };
 
-            setupPlayer(
-                [
-                    "https://collection.talha07.workers.dev/download.aspx?file=BhqlRzi4aLRrnjEboOtyCw%2F3oPyK9%2B%2FwrJnHcihupVwJxc9%2B%2BplSutMOegXmVg%2Fn&expiry=FMEvW9yHVfalAthH3o2uRw%3D%3D&mac=279d53ef76b4640275a81761e4e1580b2e80a8e97ec6019e2fb3f7c36cc4c387"
-                   
-                ],
-                {
-                    keyId: "",
-                    key: ""
-                },
-                ""
-            );
+        // Load the Facebook SDK asynchronously
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+
+        // Hide the text overlay for the second video when it starts playing
+        function hideOverlayTextOnPlay() {
+            FB.Event.subscribe('xfbml.ready', function(msg) {
+                if (msg.type === 'video') {
+                    var video2Player = msg.instance;
+
+                    // Listen for when the second video starts playing
+                    video2Player.subscribe('startedPlaying', function() {
+                        document.getElementById('overlay-text2').style.display = 'none';
+                    });
+                }
+            });
         }
     </script>
+
 </body>
 </html>
