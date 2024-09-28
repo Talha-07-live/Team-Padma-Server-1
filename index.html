@@ -5,20 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chained Facebook Video</title>
     <style>
-        /* Responsive video container */
+        /* Responsive video container for fullscreen-like effect */
         .video-container {
-            position: absolute;
-            width: 100% !important;
-            height: 100% !important;
-            background-color: #000;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            margin-bottom: 20px; /* Spacing between videos */
         }
 
-        .video-container iframe, 
         .video-container .fb-video {
             position: absolute;
-            width: 100% !important;
-            height: 100% !important;
-            background-color: #000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Fullscreen container styling */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            padding-bottom: 0;
+            z-index: 9999;
+        }
+
+        /* Basic button styling */
+        #fullscreen-btn {
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #fullscreen-btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -42,7 +70,24 @@
             data-autoplay="true"></div>
     </div>
 
+    <!-- Fullscreen toggle button -->
+    <button id="fullscreen-btn" style="display: none;">Enter Fullscreen</button>
+
     <script>
+        // Fullscreen toggle functionality
+        function toggleFullScreen(containerId) {
+            const container = document.getElementById(containerId);
+            if (!document.fullscreenElement) {
+                container.classList.add('fullscreen');
+                container.requestFullscreen().catch(err => {
+                    console.error(`Error trying to enter fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+                container.classList.remove('fullscreen');
+            }
+        }
+
         // Load the Facebook SDK
         window.fbAsyncInit = function() {
             FB.init({
@@ -55,6 +100,9 @@
                 if (msg.type === 'video') {
                     var video1Player = msg.instance;
 
+                    // Show fullscreen button when video is ready
+                    document.getElementById('fullscreen-btn').style.display = 'inline-block';
+
                     // Listen for the end of the first video
                     video1Player.subscribe('finishedPlaying', function() {
                         // Hide the first video container
@@ -65,6 +113,11 @@
 
                         // Reload the XFBML to render the second video
                         FB.XFBML.parse(document.getElementById('fb-video2-container'));
+                    });
+
+                    // Add fullscreen button functionality
+                    document.getElementById('fullscreen-btn').addEventListener('click', function() {
+                        toggleFullScreen('fb-video1-container');
                     });
                 }
             });
@@ -78,6 +131,14 @@
             js.src = "https://connect.facebook.net/en_US/sdk.js";
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
+
+        // Event listener for exiting fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            const container = document.getElementById('fb-video1-container');
+            if (!document.fullscreenElement) {
+                container.classList.remove('fullscreen');
+            }
+        });
     </script>
 
 </body>
