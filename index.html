@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chained Facebook Video</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         /* Style for the text overlay */
         .overlay-text {
@@ -20,13 +24,21 @@
         }
         .video-container {
             position: relative;
-            width: 560px;
-            height: 314px;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            margin-bottom: 20px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
 
+<div class="container">
     <!-- First Facebook Video -->
     <div id="fb-video1-container" class="video-container">
         <!-- Overlay text -->
@@ -50,69 +62,74 @@
             data-show-text="false" 
             data-autoplay="true"></div>
     </div>
+</div>
 
-    <script>
-        // Load the Facebook SDK
-        window.fbAsyncInit = function() {
-            FB.init({
-                xfbml      : true,
-                version    : 'v10.0'
-            });
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-            // Subscribe to video player events
-            FB.Event.subscribe('xfbml.ready', function(msg) {
-                if (msg.type === 'video') {
-                    var video1Player = msg.instance;
+<script>
+    // Load the Facebook SDK
+    window.fbAsyncInit = function() {
+        FB.init({
+            xfbml      : true,
+            version    : 'v10.0'
+        });
 
-                    // Show the overlay text before the video starts
-                    document.getElementById('overlay-text1').style.display = 'block';
+        // Subscribe to video player events
+        FB.Event.subscribe('xfbml.ready', function(msg) {
+            if (msg.type === 'video') {
+                var video1Player = msg.instance;
 
-                    // Listen for when the first video starts playing
-                    video1Player.subscribe('startedPlaying', function() {
-                        document.getElementById('overlay-text1').style.display = 'none';
-                    });
+                // Show the overlay text before the video starts
+                document.getElementById('overlay-text1').style.display = 'block';
 
-                    // Listen for when the first video finishes playing
-                    video1Player.subscribe('finishedPlaying', function() {
-                        // Hide the first video container
-                        document.getElementById('fb-video1-container').style.display = 'none';
-                        
-                        // Show the second video container and reload it
-                        document.getElementById('fb-video2-container').style.display = 'block';
+                // Listen for when the first video starts playing
+                video1Player.subscribe('startedPlaying', function() {
+                    document.getElementById('overlay-text1').style.display = 'none';
+                });
 
-                        // Reload the XFBML to render the second video
-                        FB.XFBML.parse(document.getElementById('fb-video2-container'));
+                // Listen for when the first video finishes playing
+                video1Player.subscribe('finishedPlaying', function() {
+                    // Hide the first video container
+                    document.getElementById('fb-video1-container').style.display = 'none';
+                    
+                    // Show the second video container and reload it
+                    document.getElementById('fb-video2-container').style.display = 'block';
 
-                        // Show the overlay text for the second video
-                        document.getElementById('overlay-text2').style.display = 'block';
-                    });
-                }
-            });
-        };
+                    // Reload the XFBML to render the second video
+                    FB.XFBML.parse(document.getElementById('fb-video2-container'));
 
-        // Load the Facebook SDK asynchronously
-        (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
+                    // Show the overlay text for the second video
+                    document.getElementById('overlay-text2').style.display = 'block';
+                });
+            }
+        });
+    };
 
-        // Hide the text overlay for the second video when it starts playing
-        function hideOverlayTextOnPlay() {
-            FB.Event.subscribe('xfbml.ready', function(msg) {
-                if (msg.type === 'video') {
-                    var video2Player = msg.instance;
+    // Load the Facebook SDK asynchronously
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
 
-                    // Listen for when the second video starts playing
-                    video2Player.subscribe('startedPlaying', function() {
-                        document.getElementById('overlay-text2').style.display = 'none';
-                    });
-                }
-            });
-        }
-    </script>
+    // Hide the text overlay for the second video when it starts playing
+    function hideOverlayTextOnPlay() {
+        FB.Event.subscribe('xfbml.ready', function(msg) {
+            if (msg.type === 'video') {
+                var video2Player = msg.instance;
+
+                // Listen for when the second video starts playing
+                video2Player.subscribe('startedPlaying', function() {
+                    document.getElementById('overlay-text2').style.display = 'none';
+                });
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
